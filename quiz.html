@@ -1041,12 +1041,23 @@ function shuffle(arr) {
   return a;
 }
 
+function prepareQuestionsForRound() {
+  return shuffle(questions).map(q => {
+    const indices = shuffle(q.answers.map((_, idx) => idx));
+    return {
+      ...q,
+      answers: indices.map(idx => q.answers[idx]),
+      correct: indices.indexOf(q.correct)
+    };
+  });
+}
+
 function startQuiz() {
   score = 0;
   currentQ = 0;
   answered = false;
   catScores = { initiation: {right:0,total:0}, healing: {right:0,total:0}, service: {right:0,total:0}, covenant: {right:0,total:0} };
-  shuffledQuestions = shuffle(questions);
+  shuffledQuestions = prepareQuestionsForRound();
   showScreen('quiz');
   renderQuestion();
 }
@@ -1070,14 +1081,13 @@ function renderQuestion() {
   document.getElementById('qText').textContent = q.q;
   document.getElementById('qHint').textContent = q.hint || '';
 
-  // Answers — shuffle display order but track correct
-  const indices = shuffle([0, 1, 2, 3]);
+  // Answers are pre-shuffled at the start of each round
   const grid = document.getElementById('answerGrid');
   grid.innerHTML = '';
-  indices.forEach(i => {
+  q.answers.forEach((answer, i) => {
     const btn = document.createElement('button');
     btn.className = 'answer-btn';
-    btn.textContent = q.answers[i];
+    btn.textContent = answer;
     btn.dataset.index = i;
     btn.onclick = () => selectAnswer(i, btn, q);
     grid.appendChild(btn);
