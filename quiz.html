@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>God's Toolbox Game</title>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sky: #e8f4fd;
+    --gold: #f5a623;
+    --gold-dark: #d4880a;
+    --blue: #2e86de;
+    --blue-dark: #1a5fa8;
+    --green: #27ae60;
+    --green-dark: #1e8449;
+    --red: #e74c3c;
+    --purple: #8e44ad;
+    --orange: #e67e22;
+    --cream: #fffbf0;
+    --text: #2c3e50;
+    --shadow: 0 4px 0px rgba(0,0,0,0.18);
+    --shadow-sm: 0 2px 0px rgba(0,0,0,0.15);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Nunito', sans-serif;
+    background: var(--sky);
+    background-image:
+      radial-gradient(circle at 15% 20%, rgba(255,255,255,0.7) 0%, transparent 50%),
+      radial-gradient(circle at 85% 80%, rgba(245,166,35,0.15) 0%, transparent 50%);
+    min-height: 100vh;
+    color: var(--text);
+  }
+
+  /* ---- SCREENS ---- */
+  .screen { display: none; min-height: 100vh; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+  .screen.active { display: flex; }
+
+  /* ---- HOME ---- */
+  #home {
+    background: linear-gradient(160deg, #fff9ee 0%, #e8f4fd 100%);
+    text-align: center;
+    gap: 0;
+  }
+
+  .toolbox-header {
+    background: linear-gradient(135deg, #c0392b 0%, #8e1a0f 100%);
+    width: 100%;
+    max-width: 500px;
+    border-radius: 18px 18px 0 0;
+    padding: 20px 30px 14px;
+    border: 4px solid #6b0f0a;
+    border-bottom: none;
+    box-shadow: 0 -4px 0px rgba(0,0,0,0.2) inset;
+    position: relative;
+  }
+
+  .toolbox-latch {
+    position: absolute;
+    top: -10px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 60px;
+    height: 20px;
+    background: #888;
+    border-radius: 10px;
+    border: 3px solid #555;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  }
+
+  .toolbox-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(2rem, 8vw, 3.2rem);
+    color: #fff;
+    text-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+    line-height: 1.1;
+  }
+
+  .toolbox-subtitle {
+    color: rgba(255,255,255,0.85);
+    font-size: 1rem;
+    font-weight: 600;
+    margin-top: 4px;
+  }
+
+  .toolbox-body {
+    background: linear-gradient(135deg, #e8a020 0%, #c47d0e 100%);
+    width: 100%;
+    max-width: 500px;
+    border-radius: 0 0 18px 18px;
+    padding: 24px 30px 28px;
+    border: 4px solid #9a6208;
+    border-top: none;
+    box-shadow: var(--shadow);
+  }
+
+  .tool-icons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    font-size: 2.2rem;
+    margin-bottom: 20px;
+    filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.2));
+  }
+
+  .mode-select-label {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.1rem;
+    color: #5a3200;
+    margin-bottom: 12px;
+    display: block;
+  }
+
+  .mode-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 14px 20px;
+    border-radius: 14px;
+    border: 3px solid transparent;
+    font-family: 'Nunito', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    margin-bottom: 10px;
+    text-align: left;
+  }
+
+  .mode-btn:active { transform: translateY(3px); box-shadow: 0 1px 0 rgba(0,0,0,0.2) !important; }
+
+  .mode-btn.primary {
+    background: linear-gradient(135deg, #fff 0%, #f0f8ff 100%);
+    border-color: var(--blue-dark);
+    color: var(--blue-dark);
+    box-shadow: 0 4px 0 var(--blue-dark);
+  }
+
+  .mode-btn.secondary {
+    background: linear-gradient(135deg, #fff 0%, #fffbf0 100%);
+    border-color: var(--gold-dark);
+    color: var(--gold-dark);
+    box-shadow: 0 4px 0 var(--gold-dark);
+  }
+
+  .mode-btn .btn-icon { font-size: 1.6rem; }
+  .mode-btn .btn-text { flex: 1; }
+  .mode-btn .btn-text strong { display: block; font-size: 1.05rem; }
+  .mode-btn .btn-text span { font-size: 0.82rem; font-weight: 600; opacity: 0.75; }
+
+  /* ---- QUIZ ---- */
+  #quiz { justify-content: flex-start; padding-top: 16px; gap: 16px; max-width: 600px; margin: 0 auto; }
+
+  .quiz-header {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .back-btn {
+    background: white;
+    border: 3px solid #ccc;
+    border-radius: 10px;
+    padding: 8px 14px;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    cursor: pointer;
+    font-size: 0.9rem;
+    box-shadow: var(--shadow-sm);
+    color: var(--text);
+    transition: transform 0.1s;
+  }
+  .back-btn:active { transform: translateY(2px); }
+
+  .progress-bar-wrap {
+    flex: 1;
+    background: rgba(0,0,0,0.1);
+    border-radius: 99px;
+    height: 16px;
+    overflow: hidden;
+    border: 2px solid rgba(0,0,0,0.1);
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), #2ecc71);
+    border-radius: 99px;
+    transition: width 0.5s ease;
+    position: relative;
+  }
+
+  .score-badge {
+    background: var(--gold);
+    border: 3px solid var(--gold-dark);
+    border-radius: 10px;
+    padding: 6px 12px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    color: #5a3200;
+    box-shadow: var(--shadow-sm);
+    white-space: nowrap;
+  }
+
+  .category-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 16px;
+    border-radius: 99px;
+    font-weight: 800;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border: 2px solid;
+  }
+
+  .tag-initiation { background: #eaf4ff; color: var(--blue-dark); border-color: var(--blue); }
+  .tag-healing { background: #fef0f0; color: #a93226; border-color: var(--red); }
+  .tag-service { background: #edfdf4; color: var(--green-dark); border-color: var(--green); }
+  .tag-covenant { background: #f3ecff; color: #6c3483; border-color: var(--purple); }
+
+  .question-card {
+    background: white;
+    border-radius: 20px;
+    padding: 24px;
+    width: 100%;
+    box-shadow: var(--shadow);
+    border: 3px solid #e0e0e0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .question-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 5px;
+    background: linear-gradient(90deg, var(--blue), var(--purple), var(--orange));
+  }
+
+  .q-num {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+
+  .q-text {
+    font-size: clamp(1rem, 3.5vw, 1.2rem);
+    font-weight: 700;
+    line-height: 1.5;
+    color: var(--text);
+  }
+
+  .q-hint {
+    margin-top: 10px;
+    font-size: 0.85rem;
+    color: #888;
+    font-style: italic;
+    font-weight: 600;
+  }
+
+  .answer-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
+  }
+
+  .answer-btn {
+    background: white;
+    border: 3px solid #d0d0d0;
+    border-radius: 14px;
+    padding: 14px 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.1s, border-color 0.1s, background 0.1s;
+    line-height: 1.4;
+    box-shadow: 0 3px 0 #c0c0c0;
+    color: var(--text);
+  }
+
+  .answer-btn:hover { border-color: var(--blue); transform: translateY(-2px); box-shadow: 0 5px 0 var(--blue); }
+  .answer-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #aaa; }
+
+  .answer-btn.correct {
+    background: linear-gradient(135deg, #d5f5e3, #a9dfbf);
+    border-color: var(--green);
+    box-shadow: 0 3px 0 var(--green-dark);
+    color: var(--green-dark);
+    animation: popIn 0.3s ease;
+  }
+
+  .answer-btn.wrong {
+    background: linear-gradient(135deg, #fde8e8, #f5b7b1);
+    border-color: var(--red);
+    box-shadow: 0 3px 0 #a93226;
+    color: #a93226;
+    animation: shake 0.4s ease;
+  }
+
+  .answer-btn.reveal-correct {
+    background: linear-gradient(135deg, #d5f5e3, #a9dfbf);
+    border-color: var(--green);
+    box-shadow: 0 3px 0 var(--green-dark);
+    color: var(--green-dark);
+    opacity: 0.8;
+  }
+
+  .answer-btn:disabled { cursor: default; }
+
+  @keyframes popIn {
+    0% { transform: scale(0.95); }
+    60% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-4px); }
+    80% { transform: translateX(4px); }
+  }
+
+  /* Feedback panel */
+  .feedback-panel {
+    width: 100%;
+    border-radius: 16px;
+    padding: 16px 20px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    display: none;
+    align-items: flex-start;
+    gap: 12px;
+    animation: slideUp 0.3s ease;
+    border: 3px solid;
+  }
+
+  .feedback-panel.show { display: flex; }
+  .feedback-panel.correct-fb { background: #edfdf4; border-color: var(--green); color: var(--green-dark); }
+  .feedback-panel.wrong-fb { background: #fef0f0; border-color: var(--red); color: #a93226; }
+
+  .feedback-emoji { font-size: 1.8rem; flex-shrink: 0; }
+  .feedback-text strong { display: block; font-size: 1rem; }
+  .feedback-text span { font-size: 0.88rem; font-weight: 600; opacity: 0.85; }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .next-btn {
+    background: linear-gradient(135deg, var(--blue) 0%, var(--blue-dark) 100%);
+    color: white;
+    border: 3px solid var(--blue-dark);
+    border-radius: 14px;
+    padding: 14px 32px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.2rem;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #0e3d6e;
+    transition: transform 0.1s, box-shadow 0.1s;
+    display: none;
+    letter-spacing: 0.03em;
+    width: 100%;
+    align-self: stretch;
+  }
+
+  .next-btn.show { display: block; }
+  .next-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #0e3d6e; }
+
+  /* ---- RESULTS ---- */
+  #results { text-align: center; gap: 20px; }
+
+  .trophy-wrap {
+    font-size: 5rem;
+    animation: float 2s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-12px); }
+  }
+
+  .results-card {
+    background: white;
+    border-radius: 24px;
+    padding: 28px;
+    max-width: 480px;
+    width: 100%;
+    box-shadow: var(--shadow);
+    border: 3px solid #e0e0e0;
+  }
+
+  .results-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.6rem, 6vw, 2.2rem);
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .results-subtitle { color: #888; font-weight: 600; font-size: 0.9rem; margin-bottom: 20px; }
+
+  .score-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold) 0%, #f8c22a 100%);
+    border: 5px solid var(--gold-dark);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    box-shadow: 0 6px 0 var(--gold-dark), 0 8px 20px rgba(245,166,35,0.3);
+  }
+
+  .score-num {
+    font-family: 'Fredoka One', cursive;
+    font-size: 2.2rem;
+    color: #5a3200;
+    line-height: 1;
+  }
+
+  .score-label { font-size: 0.75rem; font-weight: 700; color: #7a4800; text-transform: uppercase; }
+
+  .category-breakdown { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+
+  .cat-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    background: #f8f9fa;
+    border: 2px solid #e9ecef;
+  }
+
+  .cat-row-icon { font-size: 1.4rem; }
+  .cat-row-info { flex: 1; }
+  .cat-row-info strong { display: block; font-size: 0.9rem; color: var(--text); }
+  .cat-row-info span { font-size: 0.78rem; color: #888; font-weight: 600; }
+  .cat-row-score { font-family: 'Fredoka One', cursive; font-size: 1.1rem; color: var(--green-dark); }
+
+  .play-again-btn {
+    background: linear-gradient(135deg, var(--green) 0%, var(--green-dark) 100%);
+    color: white;
+    border: 3px solid var(--green-dark);
+    border-radius: 14px;
+    padding: 14px 32px;
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.3rem;
+    cursor: pointer;
+    box-shadow: 0 5px 0 #1a6b3d;
+    transition: transform 0.1s, box-shadow 0.1s;
+    width: 100%;
+    max-width: 480px;
+    letter-spacing: 0.03em;
+  }
+  .play-again-btn:active { transform: translateY(4px); box-shadow: 0 1px 0 #1a6b3d; }
+
+  /* ---- EXPLORE ---- */
+  #explore { justify-content: flex-start; padding-top: 16px; gap: 14px; max-width: 600px; margin: 0 auto; }
+
+  .explore-title {
+    font-family: 'Fredoka One', cursive;
+    font-size: clamp(1.3rem, 5vw, 1.8rem);
+    color: var(--text);
+  }
+
+  .sacrament-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; width: 100%; }
+
+  .sac-card {
+    background: white;
+    border-radius: 14px;
+    padding: 14px 10px;
+    text-align: center;
+    cursor: pointer;
+    border: 3px solid #e0e0e0;
+    transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .sac-card:hover { transform: translateY(-4px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+  .sac-card.initiation { border-top: 5px solid var(--blue); }
+  .sac-card.healing { border-top: 5px solid var(--red); }
+  .sac-card.service { border-top: 5px solid var(--green); }
+
+  .sac-card .sac-emoji { font-size: 2rem; display: block; margin-bottom: 6px; }
+  .sac-card .sac-name { font-weight: 800; font-size: 0.78rem; color: var(--text); line-height: 1.3; }
+
+  .detail-panel {
+    background: white;
+    border-radius: 18px;
+    padding: 22px;
+    width: 100%;
+    box-shadow: var(--shadow);
+    border: 3px solid #e0e0e0;
+    display: none;
+    animation: slideUp 0.3s ease;
+  }
+
+  .detail-panel.show { display: block; }
+
+  .detail-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 14px;
+    padding-bottom: 14px;
+    border-bottom: 2px solid #f0f0f0;
+  }
+
+  .detail-emoji { font-size: 2.8rem; }
+
+  .detail-header-text h3 {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1.4rem;
+    color: var(--text);
+  }
+
+  .detail-desc { font-size: 0.95rem; line-height: 1.7; font-weight: 600; color: #444; }
+
+  .detail-fact {
+    margin-top: 12px;
+    background: #fffbf0;
+    border-left: 4px solid var(--gold);
+    padding: 10px 14px;
+    border-radius: 0 10px 10px 0;
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: #7a4800;
+  }
+
+  .section-header {
+    font-family: 'Fredoka One', cursive;
+    font-size: 1rem;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .section-header::after {
+    content: '';
+    flex: 1;
+    height: 2px;
+    background: #e0e0e0;
+    border-radius: 99px;
+  }
+
+  /* ---- STARS ---- */
+  .stars-container {
+    position: fixed;
+    pointer-events: none;
+    top: 0; left: 0; width: 100%; height: 100%;
+    overflow: hidden;
+    z-index: 999;
+  }
+
+  .star-particle {
+    position: absolute;
+    font-size: 1.5rem;
+    animation: starFly 1.2s ease-out forwards;
+    pointer-events: none;
+  }
+
+  @keyframes starFly {
+    0% { transform: translateY(0) scale(1) rotate(0deg); opacity: 1; }
+    100% { transform: translateY(-200px) scale(0.3) rotate(360deg); opacity: 0; }
+  }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 480px) {
+    .answer-grid { grid-template-columns: 1fr; }
+    .sacrament-grid { grid-template-columns: 1fr 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Stars layer -->
+<div class="stars-container" id="starsContainer"></div>
+
+<!-- ====== HOME ====== -->
+<div class="screen active" id="home">
+  <div class="toolbox-header">
+    <div class="toolbox-latch"></div>
+    <div class="toolbox-title">God's Toolbox</div>
+    <div class="toolbox-subtitle">Learn the 7 Sacraments!</div>
+  </div>
+  <div class="toolbox-body">
+    <div class="tool-icons">💧🛡️🍞🤝🩹✝️💍</div>
+    <span class="mode-select-label">What do you want to do?</span>
+    <button class="mode-btn primary" onclick="startQuiz()">
+      <span class="btn-icon">🎮</span>
+      <span class="btn-text">
+        <strong>Play the Quiz!</strong>
+        <span>Answer questions, earn stars ⭐</span>
+      </span>
+    </button>
+    <button class="mode-btn secondary" onclick="showScreen('explore')">
+      <span class="btn-icon">🔍</span>
+      <span class="btn-text">
+        <strong>Explore the Tools</strong>
+        <span>Learn about each sacrament</span>
+      </span>
+    </button>
+  </div>
+</div>
+
+<!-- ====== QUIZ ====== -->
+<div class="screen" id="quiz">
+  <div class="quiz-header">
+    <button class="back-btn" onclick="showScreen('home')">← Home</button>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+    </div>
+    <div class="score-badge" id="scoreBadge">⭐ 0</div>
+  </div>
+
+  <div id="categoryTag"></div>
+
+  <div class="question-card" id="questionCard">
+    <div class="q-num" id="qNum"></div>
+    <div class="q-text" id="qText"></div>
+    <div class="q-hint" id="qHint"></div>
+  </div>
+
+  <div class="answer-grid" id="answerGrid"></div>
+
+  <div class="feedback-panel" id="feedbackPanel">
+    <span class="feedback-emoji" id="feedbackEmoji"></span>
+    <div class="feedback-text">
+      <strong id="feedbackTitle"></strong>
+      <span id="feedbackDetail"></span>
+    </div>
+  </div>
+
+  <button class="next-btn" id="nextBtn" onclick="nextQuestion()">Next Question →</button>
+</div>
+
+<!-- ====== RESULTS ====== -->
+<div class="screen" id="results">
+  <div class="trophy-wrap" id="trophyEmoji">🏆</div>
+  <div class="results-card">
+    <div class="results-title" id="resultsTitle">Great Job!</div>
+    <div class="results-subtitle" id="resultsSubtitle"></div>
+    <div class="score-circle">
+      <span class="score-num" id="finalScore"></span>
+      <span class="score-label">Stars</span>
+    </div>
+    <div class="category-breakdown" id="categoryBreakdown"></div>
+  </div>
+  <button class="play-again-btn" onclick="startQuiz()">Play Again! 🎮</button>
+  <button class="back-btn" style="margin-top:4px" onclick="showScreen('home')">← Back to Home</button>
+</div>
+
+<!-- ====== EXPLORE ====== -->
+<div class="screen" id="explore">
+  <button class="back-btn" style="align-self:flex-start" onclick="showScreen('home')">← Home</button>
+  <div class="explore-title">🔍 Explore God's Toolbox</div>
+
+  <div class="section-header">🌊 Initiation — Joining the Family</div>
+  <div class="sacrament-grid">
+    <div class="sac-card initiation" onclick="showDetail('baptism')">
+      <span class="sac-emoji">💧</span>
+      <span class="sac-name">Baptism</span>
+    </div>
+    <div class="sac-card initiation" onclick="showDetail('confirmation')">
+      <span class="sac-emoji">🛡️</span>
+      <span class="sac-name">Confirmation</span>
+    </div>
+    <div class="sac-card initiation" onclick="showDetail('eucharist')">
+      <span class="sac-emoji">🍞</span>
+      <span class="sac-name">Eucharist</span>
+    </div>
+  </div>
+
+  <div class="section-header">🩹 Healing — Getting Better</div>
+  <div class="sacrament-grid" style="grid-template-columns: 1fr 1fr;">
+    <div class="sac-card healing" onclick="showDetail('penance')">
+      <span class="sac-emoji">🤝</span>
+      <span class="sac-name">Penance & Reconciliation</span>
+    </div>
+    <div class="sac-card healing" onclick="showDetail('anointing')">
+      <span class="sac-emoji">🩹</span>
+      <span class="sac-name">Anointing of the Sick</span>
+    </div>
+  </div>
+
+  <div class="section-header">🤲 Service — Helping Others</div>
+  <div class="sacrament-grid" style="grid-template-columns: 1fr 1fr;">
+    <div class="sac-card service" onclick="showDetail('holyorders')">
+      <span class="sac-emoji">✝️</span>
+      <span class="sac-name">Holy Orders</span>
+    </div>
+    <div class="sac-card service" onclick="showDetail('matrimony')">
+      <span class="sac-emoji">💍</span>
+      <span class="sac-name">Matrimony</span>
+    </div>
+  </div>
+
+  <div class="detail-panel" id="detailPanel">
+    <div class="detail-header">
+      <span class="detail-emoji" id="detailEmoji"></span>
+      <div class="detail-header-text">
+        <h3 id="detailName"></h3>
+        <div id="detailTag"></div>
+      </div>
+    </div>
+    <div class="detail-desc" id="detailDesc"></div>
+    <div class="detail-fact" id="detailFact"></div>
+  </div>
+</div>
+
+<script>
+// ========== DATA ==========
+
+const sacramentDetails = {
+  baptism: {
+    emoji: '💧', name: 'Baptism', category: 'initiation',
+    desc: 'Baptism is the very first sacrament — the gateway to all the others! The priest or deacon pours water over you (or dunks you in) while saying "I baptize you in the name of the Father, and of the Son, and of the Holy Spirit." Water washes away original sin and you become a brand new child of God!',
+    fact: '⭐ Fun Fact: Just like a plant needs water to grow, your soul needs Baptism to grow in God\'s love!'
+  },
+  confirmation: {
+    emoji: '🛡️', name: 'Confirmation', category: 'initiation',
+    desc: 'Confirmation makes you stronger in your faith! The bishop anoints your forehead with a special perfumed oil called Sacred Chrism and lays his hands on your head. The Holy Spirit fills you up and makes you brave to share your faith with others.',
+    fact: '⭐ Fun Fact: Sacred Chrism is perfumed oil — it\'s also used in Baptism and Holy Orders!'
+  },
+  eucharist: {
+    emoji: '🍞', name: 'Eucharist', category: 'initiation',
+    desc: 'The Eucharist is the most amazing gift! During Mass, the bread and wine truly become the Body and Blood of Jesus. This isn\'t just a symbol — Jesus is REALLY there! We call this the Real Presence. When we receive Holy Communion, Jesus himself comes to us.',
+    fact: '⭐ Fun Fact: Your body needs food to stay strong, and your soul needs the Eucharist to stay close to Jesus!'
+  },
+  penance: {
+    emoji: '🤝', name: 'Penance & Reconciliation', category: 'healing',
+    desc: 'Sometimes we make bad choices and sin. Penance is how God forgives us! You tell your sins to a priest in confession. Then the priest extends his hand in blessing and says "I absolve you from your sins in the name of the Father, and of the Son, and of the Holy Spirit." Your sins are forgiven!',
+    fact: '⭐ Fun Fact: Like cleaning a cut on your knee, Penance cleans your soul so it can heal!'
+  },
+  anointing: {
+    emoji: '🩹', name: 'Anointing of the Sick', category: 'healing',
+    desc: 'When someone is very sick or very old, the priest comes and anoints their head and hands with a special oil called the Oil of the Sick. The priest prays that God will send healing, peace, and courage to the person. It\'s God\'s way of showing love when we feel our worst.',
+    fact: '⭐ Fun Fact: Jesus healed sick people during his life on Earth. Anointing of the Sick continues that same loving care!'
+  },
+  holyorders: {
+    emoji: '✝️', name: 'Holy Orders', category: 'service',
+    desc: 'Holy Orders is how men become bishops, priests, and deacons! During the celebration, the bishop lays his hands on the man\'s head and prays to the Holy Spirit. Priests lead parishes, preach the Gospel, and celebrate the sacraments. Deacons help at Mass, baptize, witness weddings, and do works of charity.',
+    fact: '⭐ Fun Fact: A priest is like a shepherd who takes care of his whole parish family!'
+  },
+  matrimony: {
+    emoji: '💍', name: 'Matrimony', category: 'service',
+    desc: 'Matrimony is the sacrament of marriage! A baptized man and woman make solemn vows (very serious promises) before God, a priest or deacon, and witnesses. They promise to love and be faithful to each other in good times AND in bad times, for their whole lives.',
+    fact: '⭐ Fun Fact: Married couples serve God by loving each other, raising their children, and helping their community!'
+  }
+};
+
+const questions = [
+  // INITIATION
+  {
+    category: 'initiation',
+    q: 'Which sacrament is the FIRST one — the doorway to all the others — where water washes away original sin?',
+    hint: '💧 Think about water...',
+    answers: ['Baptism', 'Confirmation', 'Eucharist', 'Holy Orders'],
+    correct: 0,
+    feedback: 'In Baptism, water washes your soul clean and you become a child of God — it\'s the gateway to all other sacraments!'
+  },
+  {
+    category: 'initiation',
+    q: 'What is the name of the perfumed oil used to anoint people in Baptism, Confirmation, and Holy Orders?',
+    hint: '🌿 It has two words: "Sacred ___"',
+    answers: ['Holy Water', 'Sacred Chrism', 'Olive Oil', 'Oil of the Sick'],
+    correct: 1,
+    feedback: 'Sacred Chrism is special perfumed oil blessed by a bishop. It seals you for God\'s special purpose!'
+  },
+  {
+    category: 'initiation',
+    q: 'In Confirmation, who places their hands on your head and prays to the Holy Spirit?',
+    hint: '⛪ It\'s someone who leads many parishes...',
+    answers: ['A deacon', 'Your parent', 'The bishop', 'Your teacher'],
+    correct: 2,
+    feedback: 'The bishop lays hands on your head and anoints you with Sacred Chrism, sealing you with the Holy Spirit!'
+  },
+  {
+    category: 'initiation',
+    q: 'In the Eucharist, Catholics believe the bread and wine TRULY become the Body and Blood of Jesus. What is this teaching called?',
+    hint: '👁️ Two words: "The ___ ___"',
+    answers: ['The Big Change', 'The Holy Meal', 'The Real Presence', 'The Last Supper'],
+    correct: 2,
+    feedback: 'The Real Presence means Jesus is truly and fully there in the Eucharist — not just a symbol, but really him!'
+  },
+  {
+    category: 'initiation',
+    q: 'The Sacraments of Initiation welcome us into the Church. Which THREE sacraments are they?',
+    hint: '🔑 The first three tools in the toolbox...',
+    answers: ['Baptism, Penance, Eucharist', 'Baptism, Confirmation, Eucharist', 'Confirmation, Eucharist, Holy Orders', 'Baptism, Matrimony, Eucharist'],
+    correct: 1,
+    feedback: 'Baptism, Confirmation, and Eucharist are the three Sacraments of Initiation — they celebrate joining the Church family!'
+  },
+  // HEALING
+  {
+    category: 'healing',
+    q: 'When we sin, we can go to the Sacrament of Penance. What does the priest do when he forgives your sins?',
+    hint: '✋ He makes a blessing motion with his hand...',
+    answers: ['Shakes your hand', 'Gives you a hug', 'Extends his hand in blessing', 'Rings a bell'],
+    correct: 2,
+    feedback: 'The priest extends his hand in blessing and says "I absolve you from your sins in the name of the Father, and of the Son, and of the Holy Spirit." Your sins are forgiven!'
+  },
+  {
+    category: 'healing',
+    q: 'What oil does a priest use when he celebrates the Anointing of the Sick?',
+    hint: '🩺 It\'s named after who receives it...',
+    answers: ['Sacred Chrism', 'Oil of the Sick', 'Baptism Oil', 'Cooking Oil'],
+    correct: 1,
+    feedback: 'The priest uses the Oil of the Sick to anoint the head and hands of the person. It brings God\'s peace and healing!'
+  },
+  {
+    category: 'healing',
+    q: 'Which two sacraments are called the "Sacraments of Healing"?',
+    hint: '🩹 One fixes sin, the other helps sick people...',
+    answers: [
+      'Baptism and Confirmation',
+      'Eucharist and Holy Orders',
+      'Penance & Reconciliation and Anointing of the Sick',
+      'Matrimony and Penance'
+    ],
+    correct: 2,
+    feedback: 'Penance & Reconciliation heals our souls when we sin, and Anointing of the Sick helps people who are very ill — both are Sacraments of Healing!'
+  },
+  {
+    category: 'healing',
+    q: 'The Sacrament of Penance is also called Confession or "Penance and ___________."',
+    hint: '🕊️ It means making peace again...',
+    answers: ['Relaxation', 'Reconciliation', 'Redemption', 'Recreation'],
+    correct: 1,
+    feedback: 'Reconciliation means making peace again! When God forgives us, we are reconciled — friends with God once more!'
+  },
+  // SERVICE
+  {
+    category: 'service',
+    q: 'In Holy Orders, a man becomes a priest or deacon. Which person performs this sacrament?',
+    hint: '⛪ He leads many churches across a whole region...',
+    answers: ['Another priest', 'The Pope alone', 'The bishop', 'A deacon'],
+    correct: 2,
+    feedback: 'The bishop celebrates Holy Orders! He lays his hands on the man\'s head and prays to the Holy Spirit to ordain him.'
+  },
+  {
+    category: 'service',
+    q: 'A deacon can baptize, witness weddings, and do works of charity. What is one thing a PRIEST can do that a deacon CANNOT?',
+    hint: '🍞 Think about the most important sacrament at Mass...',
+    answers: ['Read the Bible', 'Lead prayer', 'Celebrate the Eucharist and hear confessions', 'Visit sick people'],
+    correct: 2,
+    feedback: 'Priests can celebrate the Eucharist and hear confessions (Penance) — these require the full Sacrament of Holy Orders as a priest!'
+  },
+  {
+    category: 'service',
+    q: 'In Matrimony, a man and woman make vows — solemn promises before God. What do they promise?',
+    hint: '💑 Think about ALL of life — not just the easy parts...',
+    answers: [
+      'To be happy together always',
+      'To love and be faithful in good times AND in bad times',
+      'To attend Mass every Sunday',
+      'To have lots of children'
+    ],
+    correct: 1,
+    feedback: 'Married couples promise to love and be faithful "in good times and in bad times" — through everything life brings!'
+  },
+  {
+    category: 'service',
+    q: 'Holy Orders and Matrimony are called the "Sacraments at the Service of ___________."',
+    hint: '🤲 They\'re about giving yourself to others...',
+    answers: ['Forgiveness', 'Communion', 'Heaven', 'Prayer'],
+    correct: 1,
+    feedback: 'They are the Sacraments at the Service of Communion! Priests serve God\'s family, and married couples serve God by loving each other and their children.'
+  },
+  // MIXED
+  {
+    category: 'initiation',
+    q: 'When a baby is baptized and grows up, on what special night do ADULTS receive all three Sacraments of Initiation at once?',
+    hint: '🌙 It happens the night before a very important Sunday...',
+    answers: ['Christmas Eve', 'The Easter Vigil', 'Pentecost Sunday', 'Palm Sunday'],
+    correct: 1,
+    feedback: 'At the Easter Vigil (the night before Easter), adults receive Baptism, Confirmation, AND Eucharist all in the same ceremony!'
+  },
+  {
+    category: 'healing',
+    q: 'What is DIFFERENT between sin and sickness, even though both need healing?',
+    hint: '🤔 One is a choice...',
+    answers: [
+      'Only sick people are sad',
+      'Sin is the result of our own choices',
+      'God only cares about sick people',
+      'There is no difference'
+    ],
+    correct: 1,
+    feedback: 'Sin comes from our own bad choices, while sickness just happens to us. God loves and heals us through both Sacraments of Healing!'
+  },
+  // COVENANT & EARLY CHURCH
+  {
+    category: 'covenant',
+    q: 'A covenant is a special kind of promise. What is a covenant?',
+    hint: '📜 It is a promise between God and people.',
+    answers: [
+      'A song people sing at church',
+      'A sacred promise between God and humans',
+      'A special church building',
+      'A list of rules only for priests'
+    ],
+    correct: 1,
+    feedback: 'A covenant is a sacred promise or agreement between God and humans.'
+  },
+  {
+    category: 'covenant',
+    q: 'What did God promise Abraham?',
+    hint: '⭐ Think about the night sky.',
+    answers: [
+      'That he would build a city',
+      'That he would become a king',
+      'That his family would outnumber the stars',
+      'That he would travel to Rome'
+    ],
+    correct: 2,
+    feedback: 'God promised Abraham that his family would be as numerous as the stars.'
+  },
+  {
+    category: 'covenant',
+    q: 'What was the name of Abraham\'s wife?',
+    hint: '👩 Her name starts with S.',
+    answers: ['Mary', 'Sarah', 'Martha', 'Ruth'],
+    correct: 1,
+    feedback: 'Sarah was Abraham\'s wife, and God blessed them with a son in their old age.'
+  },
+  {
+    category: 'covenant',
+    q: 'All followers of Jesus are called what?',
+    hint: '✝️ It starts with C.',
+    answers: ['Romans', 'Shepherds', 'Christians', 'Priests'],
+    correct: 2,
+    feedback: 'All followers of Jesus are called Christians.'
+  },
+  {
+    category: 'covenant',
+    q: 'To proclaim the story of Jesus means to do what?',
+    hint: '📣 You can do it with words and actions.',
+    answers: [
+      'Hide your faith from others',
+      'Tell the story of Jesus in words and actions',
+      'Write only to one person',
+      'Stay quiet in church'
+    ],
+    correct: 1,
+    feedback: 'To proclaim means to tell the story of Jesus in words and actions.'
+  },
+  {
+    category: 'covenant',
+    q: 'How were many early believers treated when they shared their faith?',
+    hint: '😟 They were treated badly.',
+    answers: ['Celebrated', 'Persecuted', 'Ignored', 'Crowned'],
+    correct: 1,
+    feedback: 'Many early believers were persecuted for proclaiming their faith.'
+  },
+  {
+    category: 'covenant',
+    q: 'Saint Clement was an early what?',
+    hint: '⛪ He led the Church.',
+    answers: ['King', 'Monk', 'Pope', 'Prophet'],
+    correct: 2,
+    feedback: 'Saint Clement was an early Pope who learned about Jesus from Saint Peter.'
+  },
+  {
+    category: 'covenant',
+    q: 'Saint Clement of Rome wrote a letter to the Christians in which city?',
+    hint: '✉️ The city starts with C.',
+    answers: ['Corinth', 'Capernaum', 'Cana', 'Caesarea'],
+    correct: 0,
+    feedback: 'One of the oldest letters from a Pope was written by Saint Clement to the Christians in Corinth.'
+  },
+  {
+    category: 'covenant',
+    q: 'What does it mean to be faithful?',
+    hint: '🤝 Think loyal and steady.',
+    answers: [
+      'To change your mind every day',
+      'To be constant and loyal to God and others',
+      'To be afraid to speak',
+      'To stay by yourself'
+    ],
+    correct: 1,
+    feedback: 'Being faithful means being constant and loyal to promises and commitments to God and others.'
+  },
+  {
+    category: 'covenant',
+    q: 'Why were monasteries important when Rome was attacked?',
+    hint: '🕯️ They helped keep something alive.',
+    answers: [
+      'They trained soldiers for battle',
+      'They kept the Christian faith alive',
+      'They collected taxes for Rome',
+      'They built ships for traders'
+    ],
+    correct: 1,
+    feedback: 'Monasteries in Ireland and Scotland helped keep the Christian faith alive.'
+  }
+];
+
+// ========== STATE ==========
+let currentQ = 0;
+let score = 0;
+let shuffledQuestions = [];
+let catScores = { initiation: {right:0,total:0}, healing: {right:0,total:0}, service: {right:0,total:0}, covenant: {right:0,total:0} };
+let answered = false;
+
+// ========== NAVIGATION ==========
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+// ========== QUIZ LOGIC ==========
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startQuiz() {
+  score = 0;
+  currentQ = 0;
+  answered = false;
+  catScores = { initiation: {right:0,total:0}, healing: {right:0,total:0}, service: {right:0,total:0}, covenant: {right:0,total:0} };
+  shuffledQuestions = shuffle(questions);
+  showScreen('quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = shuffledQuestions[currentQ];
+  const total = shuffledQuestions.length;
+
+  // Progress
+  document.getElementById('progressFill').style.width = (currentQ / total * 100) + '%';
+  document.getElementById('scoreBadge').textContent = '⭐ ' + score;
+
+  // Category tag
+  const catColors = { initiation: 'tag-initiation', healing: 'tag-healing', service: 'tag-service', covenant: 'tag-covenant' };
+  const catLabels = { initiation: '🌊 Initiation', healing: '🩹 Healing', service: '🤲 Service', covenant: '📜 Covenant' };
+  document.getElementById('categoryTag').innerHTML =
+    `<span class="category-tag ${catColors[q.category]}">${catLabels[q.category]}</span>`;
+
+  // Question
+  document.getElementById('qNum').textContent = `Question ${currentQ + 1} of ${total}`;
+  document.getElementById('qText').textContent = q.q;
+  document.getElementById('qHint').textContent = q.hint || '';
+
+  // Answers — shuffle display order but track correct
+  const indices = shuffle([0, 1, 2, 3]);
+  const grid = document.getElementById('answerGrid');
+  grid.innerHTML = '';
+  indices.forEach(i => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = q.answers[i];
+    btn.dataset.index = i;
+    btn.onclick = () => selectAnswer(i, btn, q);
+    grid.appendChild(btn);
+  });
+
+  // Hide feedback & next
+  const fb = document.getElementById('feedbackPanel');
+  fb.className = 'feedback-panel';
+  document.getElementById('nextBtn').className = 'next-btn';
+  answered = false;
+}
+
+function selectAnswer(idx, btn, q) {
+  if (answered) return;
+  answered = true;
+
+  const allBtns = document.querySelectorAll('.answer-btn');
+  allBtns.forEach(b => b.disabled = true);
+
+  const isCorrect = idx === q.correct;
+  catScores[q.category].total++;
+
+  const fb = document.getElementById('feedbackPanel');
+
+  if (isCorrect) {
+    btn.classList.add('correct');
+    score++;
+    catScores[q.category].right++;
+    fb.className = 'feedback-panel correct-fb show';
+    document.getElementById('feedbackEmoji').textContent = ['🎉','⭐','✅','🌟','💫'][Math.floor(Math.random()*5)];
+    document.getElementById('feedbackTitle').textContent = 'That\'s right!';
+    document.getElementById('feedbackDetail').textContent = q.feedback;
+    document.getElementById('scoreBadge').textContent = '⭐ ' + score;
+    spawnStars();
+  } else {
+    btn.classList.add('wrong');
+    // Reveal correct
+    allBtns.forEach(b => {
+      if (parseInt(b.dataset.index) === q.correct) b.classList.add('reveal-correct');
+    });
+    fb.className = 'feedback-panel wrong-fb show';
+    document.getElementById('feedbackEmoji').textContent = '💡';
+    document.getElementById('feedbackTitle').textContent = 'Not quite — here\'s the answer:';
+    document.getElementById('feedbackDetail').textContent = q.feedback;
+  }
+
+  document.getElementById('nextBtn').className = 'next-btn show';
+}
+
+function nextQuestion() {
+  currentQ++;
+  if (currentQ >= shuffledQuestions.length) {
+    showResults();
+  } else {
+    renderQuestion();
+    window.scrollTo(0, 0);
+  }
+}
+
+// ========== RESULTS ==========
+function showResults() {
+  const total = shuffledQuestions.length;
+  const pct = score / total;
+
+  let trophy = '🏆', title = '', subtitle = '';
+  if (pct === 1) { trophy='🏆✨'; title='Perfect Score!'; subtitle='You really know this faith lesson!'; }
+  else if (pct >= 0.8) { trophy='🌟'; title='Amazing Job!'; subtitle='You\'re doing a great job with these faith questions!'; }
+  else if (pct >= 0.6) { trophy='😊'; title='Good Work!'; subtitle='Keep studying and you\'ll get even better!'; }
+  else { trophy='💪'; title='Keep Practicing!'; subtitle='Try again — you\'re going to get it!'; }
+
+  document.getElementById('trophyEmoji').textContent = trophy;
+  document.getElementById('resultsTitle').textContent = title;
+  document.getElementById('resultsSubtitle').textContent = subtitle;
+  document.getElementById('finalScore').textContent = score + '/' + total;
+
+  const breakdown = document.getElementById('categoryBreakdown');
+  const cats = [
+    { key: 'initiation', emoji: '🌊', label: 'Initiation' },
+    { key: 'healing', emoji: '🩹', label: 'Healing' },
+    { key: 'service', emoji: '🤲', label: 'Service' },
+    { key: 'covenant', emoji: '📜', label: 'Covenant' },
+  ];
+  breakdown.innerHTML = cats.map(c => {
+    const d = catScores[c.key];
+    if (d.total === 0) return '';
+    return `<div class="cat-row">
+      <span class="cat-row-icon">${c.emoji}</span>
+      <div class="cat-row-info">
+        <strong>${c.label}</strong>
+        <span>${d.total} question${d.total!==1?'s':''}</span>
+      </div>
+      <span class="cat-row-score">${d.right}/${d.total}</span>
+    </div>`;
+  }).join('');
+
+  document.getElementById('progressFill').style.width = '100%';
+  showScreen('results');
+  if (pct >= 0.8) spawnStars(30);
+}
+
+// ========== EXPLORE ==========
+function showDetail(key) {
+  const d = sacramentDetails[key];
+  const catTag = { initiation: 'tag-initiation', healing: 'tag-healing', service: 'tag-service' };
+  const catLabel = { initiation: '🌊 Initiation', healing: '🩹 Healing', service: '🤲 Service' };
+
+  document.getElementById('detailEmoji').textContent = d.emoji;
+  document.getElementById('detailName').textContent = d.name;
+  document.getElementById('detailTag').innerHTML = `<span class="category-tag ${catTag[d.category]}" style="font-size:0.75rem;padding:3px 10px">${catLabel[d.category]}</span>`;
+  document.getElementById('detailDesc').textContent = d.desc;
+  document.getElementById('detailFact').textContent = d.fact;
+
+  const panel = document.getElementById('detailPanel');
+  panel.classList.add('show');
+  setTimeout(() => panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+}
+
+// ========== STARS ==========
+function spawnStars(count = 12) {
+  const container = document.getElementById('starsContainer');
+  const emojis = ['⭐','🌟','✨','💫','🎉'];
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'star-particle';
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      el.style.left = Math.random() * 100 + 'vw';
+      el.style.top = (30 + Math.random() * 40) + 'vh';
+      el.style.animationDelay = Math.random() * 0.3 + 's';
+      el.style.fontSize = (1 + Math.random()) + 'rem';
+      container.appendChild(el);
+      setTimeout(() => el.remove(), 1500);
+    }, i * 60);
+  }
+}
+</script>
+</body>
+</html>
